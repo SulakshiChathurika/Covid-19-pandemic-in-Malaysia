@@ -1,0 +1,384 @@
+---
+title: "Covid-19 Pandemic In MALAYSIA"
+author: "W.H.S.C. Wijayarathna - AS2021450"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: readable
+---
+
+## **1 Introduction of Malaysia**
+
+ Malaysia is the 66th largest country by land area, spanning 330,803 km². It shares land borders with Thailand, Indonesia, and Brunei, and is connected to Singapore by a causeway and bridge. Malaysia has maritime boundaries with Vietnam and the Philippines. The country's geography is marked by significant features like the Perlis River and the Golok River, while the Strait of Malacca is a crucial global trade route, handling 40% of the world's trade.
+
+Economically, Malaysia is the fifth largest economy in Southeast Asia and ranks 36th globally in nominal GDP, expected to approach half a trillion USD by the end of 2024. By purchasing power parity, its GDP is the 30th largest. The country boasts high labor productivity, ranking third in ASEAN and surpassing Indonesia, Vietnam, and the Philippines. The Global Competitiveness Report of 2021 ranked Malaysia as the 25th most competitive economy worldwide.
+
+* Capital: Federal Territory of Kuala Lumpur
+
+* Area: 330,803 km2 
+
+* Population: 33.94 million 
+
+* Religion: Islam, Buddhism, Christianity, Hinduism, Confucianism, Taoism and other traditional Chinese religions.
+
+* Languages: Malay, plus English
+
+* Life expectancy: 71 years (men) 76 years (women)
+
+
+
+## **2 Covid-19 Pandemic in Malaysia**
+
+In late December 2019, the World Health Organization (WHO) was alerted to a cluster of pneumonia cases of unknown origin in Wuhan, China.
+
+ By early January 2020, this illness was identified as being caused by a novel coronavirus. Malaysia recorded its first COVID-19 cases in January 2020 among Chinese visitors. A significant surge in infections occurred in Malaysia following a large religious gathering in February 2020, which contributed to nearly half of the country's initial cases. In response to the escalating outbreak, the government imposed partial lockdown measures in March 2020. The same month also marked the country's first COVID-19 fatalities.  
+
+## **3 Exploratory Data Analysis**
+
+### **3.1 Structure of data**
+
+**Format**
+
+* date         : Date in YYYY-MM-DD format.
+* province     : Name of province/state, for countries where data is provided split across multiple provinces/states.
+* country      : Name of country/region.
+* lat          : Latitude of center of geographic region, defined as either country or, if available, province.
+* long         : Longitude of center of geographic region, defined as either country or, if available, province.
+* type         : An indicator for the type of cases (confirmed, death, recovered).
+* cases        : Number of cases on given date.
+* uid          : Country code
+* iso2         : Officially assigned country code identifiers with two-letter
+* iso3         : Officially assigned country code identifiers with three-letter
+* code3        : UN country code
+* combined_key : Country and province (if applicable)
+* population   : Country or province population
+* continent_name : Continent name
+* continent_code : Continent code
+
+**Details** :
+The dataset contains the daily summary of Coronavirus cases (confirmed, death, and recovered), by state/province.
+
+**Source** :
+Johns Hopkins University Center for Systems Science and Engineering (JHU CCSE) Coronavirus website.
+
+### **3.2 Distribution of Covid-19 in Malaysia**
+
+
+#### 3.2.1 Summary of Malaysia Covid Dataset
+
+###### *Figure 1 : Summary of Malaysia Covid Dataset*
+
+<center>
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+
+# loading the dataset
+library(devtools)
+devtools::install_github("thiyangt/sta3262")
+library(sta3262)
+library(coronavirus)
+data("coronavirus")
+
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+
+# filter Malaysia and set the negative cases as 0
+covid_Malaysia <- filter(coronavirus, country == "Malaysia") %>% mutate(cases = replace(cases, which(cases < 0), 0)) 
+
+# overall summary of the country Malaysia after setting the negative cases values as 0
+summary(covid_Malaysia)
+
+view(covid_Malaysia)
+
+# create function for plot
+plot <- function(fil_type,rename_cases,colour){
+  library(ggplot2)
+  plot_type <- covid_Malaysia %>% filter(type == fil_type) %>% select(date,cases) %>% rename(rename_cases =   cases) 
+  ggplot(plot_type, aes(x=date,y=rename_cases)) + geom_line() + geom_path(size=1, colour = colour) + labs(x   = "Date", y = rename_cases)   
+}
+
+#create function for the summary
+summary_table <- function(filter_type){
+ library(knitr)
+ 
+ plot_type <- covid_Malaysia %>% filter(type == filter_type) %>% select(date,cases)
+ 
+ kable(data.frame(mean = mean(plot_type$cases), minimum = min(plot_type$cases), median = median(plot_type$cases), maximum = max(plot_type$cases), total = sum(plot_type$cases)),)  
+}
+```
+</center>
+Figure 1 shows the overall summary of the Malaysia dataset. The minus values were replaced by 0.
+
+#### 3.2.2 Confirmed Covid Cases in Malaysia{.tabset}
+
+##### Graphycal view
+
+###### *Figure 2 : Confirmed Covid Cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+plot("confirmed","conformed_cases","blue")
+```
+
+Around the middle of 2021, there is a significant increase in cases, reaching the first major peak. This indicates a substantial outbreak during this period. After first peak, there is a decline in cases, but this is followed by another rise leading to a second major peak in early 2022. This second peak is higher than the first, suggesting a more severe outbreak. After the second peak, there is a noticeable decline in the number of confirmed cases, with smaller fluctuations throughout 2022 and into early 2023. By early 2023, the number of confirmed cases appears to have stabilized at a much lower level compared to the peak periods.
+
+##### Summary
+
+###### *Table 1 : summary of the confirmed cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+summary_table("confirmed")
+```
+Table 1 shows the details of minimum, medium, maximum and total cases of confirmed Covid cases in Malaysia. The mean column gives an idea about the number of confirmed cases related to one day.
+
+#### 3.2.3 Death Covid Cases in Malaysia{.tabset}
+
+##### Graphycal view
+
+###### *Figure 3 : Death Covid Cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+plot("death","death_cases","red") 
+```
+
+From the start of the pandemic in 2020 until early 2021, the number of deaths remained relatively low with minimal fluctuations. The death cases peak dramatically around mid-2021, reaching the highest number of deaths per day. Following the peak, there is a sharp decline in the number of deaths, suggesting effective control measures or increased immunity within the population. There is a second rise in death cases around late 2021 to early 2022, but this peak is not as high as the first.
+
+##### Summary
+
+###### *Table 2 : summary of the death cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+summary_table("death")
+```
+Table 2 shows the details of minimum, medium, maximum and total cases of death Covid cases in Malaysia. The mean column gives an idea about the number of death cases related to one day.
+
+#### 3.2.4 Recover Covid Cases in Malaysia{.tabset}
+
+##### Graphycal view
+
+###### *Figure 4 : Recovered Covid Cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+plot("recovery","recovered_cases","darkgreen")
+```
+
+Early 2021, the number of recovered cases starts low and remains relatively stable with minor fluctuations. This period corresponds to the initial stages of the pandemic. Around 2021, there is a noticeable increase in the number of recovered cases, aligning with the increase in active cases observed during this time. The trend shows several peaks and valleys, indicating fluctuations in recovery rates. The absence of data in middle 2021 and beyond 2022 suggests an issue with data reporting or recording during that period. This lack of data makes it challenging to assess the full recovery trend beyond this point.
+
+##### Summary
+
+###### *Table 3 : summary of the recovered cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+summary_table("recovery")
+```
+
+Table 3 shows the details of minimum, medium, maximum and total cases of revovery Covid cases in Malaysia. The mean column gives an idea about the number of recovered cases related to one day.
+
+#### 3.2.4 Active Covid Cases in Malaysia{.tabset}
+
+##### Graphycal view
+
+###### *Figure 5 : Active Covid Cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+
+# create pivoted table with selected columns for find active cases
+active_table <- covid_Malaysia %>% select(date,cases,type) %>% mutate(cases = replace(cases, which(cases < 0), 0))  %>%  pivot_wider(names_from = type, values_from = cases)
+
+# create active column
+active_table$active <- numeric(nrow(active_table))
+active_table$active[1] <- active_table$confirmed[1] - active_table$death[1] - active_table$recovery[1]
+for (i in 2:nrow(active_table)) {
+  active_table$active[i] <- active_table$active[i-1] + active_table$confirmed[i] - active_table$death[i] - active_table$recovery[i]
+}
+
+view(active_table)
+
+# active_table with date and active cases
+active_summary <- select(active_table, date,active)
+
+# plot for the active cases
+ggplot(active_summary, aes(x=date,y=active)) + geom_line() + geom_path(size=1, colour="black") + labs(x = "Date", y = "Active Cases") + scale_y_continuous(labels = scales::comma)
+```
+
+In the middle of 2021,there was a noticeable increase in active cases, indicating a significant wave of infections. Late 2021 - Early 2022: The number of active cases surged dramatically, reaching over 3 million. This period likely corresponds to a severe outbreak, possibly due to a highly transmissible variant or other factors.
+
+##### Summary
+
+###### *Table 4 : summary of the active cases in Malaysia* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+kable(summary(active_summary),)
+```
+Table 4 shows the details of minimum, medium, maximum and total cases of active Covid cases in Malaysia.
+
+#### 3.2.5 Confirmed, Recovery and Death cases
+
+###### *Figure 6 : Confirmed, Recovery and Death cases* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+
+# facet grid
+ggplot(covid_Malaysia, aes(date, cases, col=cases)) + geom_path(size=1) + facet_grid(rows = vars(type))
+```
+
+Figure 6 shows three line graphs comparing the distribution, height, and mean of confirmed COVID-19 cases, deaths, and recoveries from 2020 to 2023. Confirmed cases have multiple peaks with significant fluctuations, the highest reaching around 30,000 cases in mid-2021, resulting in a high mean. Death cases remain relatively flat with minor fluctuations and a much lower height, leading to the lowest mean among the three. Recovery cases increase following the peaks in confirmed cases and show a smoother pattern with substantial peaks, but lower than those of confirmed cases, leading to a moderate mean.
+
+###### *Figure 7 : Overall view*
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA,fig.width=8}
+# overview
+ggplot(data=covid_Malaysia, aes(x=date, y=cases, colour = type)) +
+  geom_point() +
+  scale_colour_manual(values = c("confirmed" = "blue", "death" = "red", "recovery" = "green"))
+```
+
+Overall, confirmed cases exhibit the highest and most variable distribution, death cases are consistently low, and recovery cases show an intermediate pattern.
+
+### **3.3 Comparison with neighbourhood countries**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+
+# filter countries
+covid_neighbourhood_countries <- filter(coronavirus, country %in% c("Thailand","Singapore","Indonesia","Philippines","Malaysia")) %>% mutate(cases = replace(cases, which(cases < 0),0))
+
+# view(covid_neighbourhood_countries)
+
+# pivoted table with selected columns
+neignbourhood_pivoted <- covid_neighbourhood_countries %>% select(date,population,country,type,cases) %>% mutate(cases = replace(cases, which(cases < 0),0)) %>% pivot_wider(names_from = type, values_from = cases)
+
+view(neignbourhood_pivoted)
+
+
+# mean and totals for each type
+mean_cases <- neignbourhood_pivoted %>% group_by(country) %>% summarise(population = mean(population), confirmed_mean = mean(confirmed), Total_confirmed = sum(confirmed) ,death_mean = mean(death), Total_death = sum(death), recovery_mean = mean(recovery), Total_recovered = sum(recovery))
+
+```
+
+#### **3.3.1 Comparison - Confirmed cases with Indonesia, Philippines, Singapore and Thailand**
+
+###### *Figure 8 : Confirmed cases of Indonesia, Philippines, Singapore and Thailand*
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+
+# create function for the animation plot for each type comparison
+anim_plot <- function(case_type) {
+  library(plotly)
+  library(ggplot2)
+  library(gapminder)
+  case_type <- sym(case_type)
+  
+  # Assuming neignbourhood_pivoted is a dataframe already defined in your environment
+  animated_plot <- ggplot(neignbourhood_pivoted, aes(date, !!case_type, col = country)) + 
+    geom_point(aes(frame = country))
+  ggplotly(animated_plot)
+}
+
+anim_plot("confirmed")
+
+plot_all <- function(type){
+  type <- sym(type)
+  ggplot(neignbourhood_pivoted, aes(date,!!type, col = country)) + 
+    geom_point() 
+}
+
+plot_all("confirmed")
+```
+
+Figure 8 shows the confirmed COVID-19 cases for Indonesia, Malaysia, Philippines, Singapore, and Thailand from 2020 to 2023. Indonesia has the highest peaks around mid-2021 and early 2022, reaching over 60,000 cases. Malaysia also shows significant peaks during the same periods, but with lower values than Indonesia. The Philippines exhibits multiple peaks, with the highest around early 2022. Singapore has smaller and more frequent peaks, with notable increases around early 2022. Thailand shows a pattern similar to the other countries, with peaks in mid-2021 and early 2022. Overall, the graph illustrates the varying impact of the pandemic across these countries over time.
+
+###### *Table 5 : summary of the Confirmed cases of all five countries* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+
+# create function for the info. table for each type comparison
+comparison_table <- function(type_mean,Total_type){
+   type_mean <- sym(type_mean)
+   Total_type <- sym(Total_type)
+   mean_table <- mean_cases %>% select(country,population,!!type_mean,!!Total_type) %>% mutate(percentage = paste0(round(!!Total_type/population*100, 2),"%" ))
+   kable(mean_table,) 
+}
+
+
+
+comparison_table("confirmed_mean","Total_confirmed")
+```
+Based on Table 5, Indonesia has the highest number of total confirmed cases, with 6,738,225 cases. In contrast, Singapore has the lowest total confirmed cases, at 2,235,294. When considering the percentage of the population affected, Singapore stands out with the highest percentage of confirmed cases at 38.21%. On the other hand, Indonesia has the lowest percentage of confirmed cases relative to its population, at 2.46%.
+
+#### **3.3.1 Comparison - Death cases with Indonesia, Philippines, Singapore and Thailand**
+
+###### *Figure 9 : death cases of Indonesia, Philippines, Singapore and Thailand*
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+anim_plot("death")
+plot_all("death")
+```
+Figure 9 depicts the death cases from COVID-19 for Indonesia, Malaysia, the Philippines, Singapore, and Thailand from 2020 to 2023. Indonesia experienced a significant spike in death cases around middle 2021, reaching its peak and then gradually declining. Malaysia and the Philippines also saw notable increases in death cases during the same period, though not as pronounced as Indonesia. Thailand and Singapore maintained relatively lower death counts throughout the period, with minor fluctuations compared to the other countries. The overall trend shows a peak in death cases around mid-2021 for most countries, followed by a decline.
+
+###### *Table 6 : summary of the death cases of all five countries* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+comparison_table("death_mean","Total_death")
+```
+
+Based on Table 6, Indonesia has the highest total number of deaths, with 160,941 deaths. In contrast, Singapore has the lowest total number of deaths, at 1,722. When considering the percentage of the population affected by deaths, Malaysia has the highest percentage at 0.11%. On the other hand, Singapore has the lowest percentage of deaths relative to its population, at 0.03%.
+
+#### **3.3.1 Comparison - Recovered cases with Indonesia, Philippines, Singapore and Thailand**
+
+###### *Figure 10 : recover cases of Indonesia, Philippines, Singapore and Thailand*
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+anim_plot("recovery")
+plot_all("recovery")
+```
+Indonesia and Malaysia had significant increases in recovery cases around middle 2021, with peaks exceeding 40,000 cases. The Philippines also saw notable spikes during this period, though to a lesser extent. Singapore and Thailand maintained relatively lower recovery counts throughout the period, with Thailand showing the least variation.
+
+###### *Table 7 : summary of the recovered cases of all five countries* :
+```{r, echo=FALSE, message=FALSE, warning=FALSE, comment=NA}
+comparison_table("recovery_mean","Total_recovered")
+```
+
+Based on Table 7, Indonesia has the highest total number of recovered cases, with 2,907,920 recoveries. In contrast, Thailand has the lowest total number of recovered cases, at 26,894. When considering the percentage of the population that has recovered, Malaysia has the highest percentage at 2.97%. On the other hand, Thailand has the lowest percentage of recoveries relative to its population, at 0.04%.
+
+### **3.4 Comparison with China and USA**
+
+We will compare Malaysia with the USA and China. China reported the first COVID-19 case, and both the USA and China have reported the highest number of cases globally. These countries are large, developed nations with significantly different population sizes. Therefore, to ensure a fair comparison, we will consider confirmed, death, and recovered cases as a percentage of their respective populations.
+
+#### **3.4.1 Confirmed cases Comparison**
+
+###### *Figure 11 : Confirmed cases as a percentage of the population*
+```{r,echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+china_usa <- filter(coronavirus, country %in% c("China","US","Malaysia")) %>% mutate(cases = replace(cases, which(cases < 0),0)) %>% select(date,country,population,type,cases) %>% pivot_wider(names_from = type, values_from = cases) 
+
+# as a percentage of the population
+percentage_table <- china_usa %>% mutate(per_conf = (confirmed/population)*100, per_death = (death/population)*100, per_recover = (recovery/population)*100)
+view(percentage_table)
+
+# create a function to each type percentage cases
+plot_china_us <- function(type,y_axis){
+  type <- sym(type)
+  ggplot(percentage_table, aes(x = date, y = !!type, color = country)) +
+  geom_smooth(se = FALSE) +
+  labs(x = "date", y = paste(y_axis,"cases")) +
+  theme_minimal() 
+}
+
+plot_china_us("per_conf","confirmed percentage")
+```
+
+The US experienced the highest and most variable rates of confirmed cases, with significant increases in early 2021 and again in 2022. Malaysia also saw notable increases in both 2021 and 2022, but these were lower than those in the US. China maintained the lowest and most stable rate of confirmed cases throughout the period, with minimal fluctuations compared to the other two countries. The overall trend indicates that while the US and Malaysia had significant waves of COVID-19, China managed to keep its confirmed cases relatively low and stable.
+
+#### **3.4.2 Death cases Comparison**
+
+###### *Figure 12 : death cases as a percentage of the population*
+```{r,echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+plot_china_us("per_death","death percentage")
+```
+The Figure 12 compares the percentage of death cases and the US shows significant peaks in death percentages around early 2021 and 2022, indicating high mortality during these periods. Malaysia also experiences notable peaks around the same times, but the values are lower compared to the US. In contrast, China maintains a consistently low death percentage throughout the period, with minimal fluctuations. This suggests that the US and Malaysia had more severe outbreaks, whereas China managed to keep the death rate relatively stable and low.
+
+#### **3.4.3 Recovery cases Comparison**
+
+###### *Figure 13 : recovery cases as a percentage of the population*
+```{r,echo=FALSE, message=FALSE, warning=FALSE, comment=NA, fig.width=8}
+plot_china_us("per_recover","recovery percentage")
+```
+
+The Figure 13 shows that Malaysia experienced a significant peak in recovery rates around late 2021, followed by a sharp decline. The US had a noticeable peak slightly earlier, in middle 2021, also followed by a decline. In contrast, China's recovery rate remained relatively stable and low throughout the period, showing no significant fluctuations.
+
+## **4 Conclusions and Discussion**
+
+The analysis reveals that confirmed CVIDO-19 cases experienced significant fluctuations with multiple peaks, indicating waves of infection with high variability. In contrast, death cases remained relatively stable with minimal fluctuation, reflecting a lower mean and suggesting improvements in treatment or prevention. Recovery cases followed the trend of confirmed cases with a smoother pattern and moderate mean, indicating effective recovery processes and a correlation with the peaks of confirmed infections.
+
+The data highlights significant differences in the impact of COVID-19 across Indonesia, Malaysia, the Philippines, Singapore, and Thailand. Indonesia experienced the highest peaks in confirmed cases, particularly around mid-2021 and early 2022, and also had the highest total number of cases and deaths. Singapore, while having the lowest total confirmed cases and deaths, saw a high percentage of its population affected by confirmed cases. In terms of recovery, Indonesia led with the highest total recoveries, while Thailand had the lowest numbers and percentage of recoveries. Overall, most countries saw a peak in death cases around middle of 2021, followed by a decline, suggesting a period of severe impact across the region. The variations in case counts, death rates, and recovery rates reflect differing pandemic impacts and healthcare responses among these countries.
+
+The data reveals that the US had the highest and most variable confirmed COVID-19 cases, with major spikes in early 2021 and 2022. Malaysia also saw significant increases in cases during these times but at lower levels than the US. China, however, managed to keep confirmed cases and death percentages low and stable throughout the period, suggesting more effective control measures. The recovery rates peaked later in Malaysia and the US, with sharp declines following, while China's recovery rate remained steady and low. This indicates that the US and Malaysia faced more intense waves of the virus, whereas China's stable rates reflect more successful management of the pandemic.
+
+## **5 References**
+
+https://en.wikipedia.org/wiki/COVID-19_pandemic_in_Malaysia#Background
+https://en.wikipedia.org/wiki/Malaysia
